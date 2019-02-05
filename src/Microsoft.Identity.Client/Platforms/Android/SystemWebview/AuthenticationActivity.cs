@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         public AuthenticationActivity()
         { }
 
-        private readonly string _customTabsServiceAction =
+        private const string CustomTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
 
         private string _requestUrl;
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 return null;
             }
 
-            Intent customTabServiceIntent = new Intent(_customTabsServiceAction);
+            Intent customTabServiceIntent = new Intent(CustomTabsServiceAction);
 
             IEnumerable<ResolveInfo> resolveInfoListWithCustomTabs = context.PackageManager.QueryIntentServices(
                     customTabServiceIntent, PackageInfoFlags.MatchAll);

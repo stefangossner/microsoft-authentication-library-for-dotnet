@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using System;
 
@@ -35,11 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            return new MacEmbeddedWebUI()
-            {
-                CoreUIParent = coreUIParent,
-                RequestContext = requestContext
-            };
+            return new MacEmbeddedWebUI(coreUIParent, requestContext);
         }
     }
 }

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -32,20 +33,25 @@ namespace Microsoft.Identity.Client.Platforms.net45
     internal class InteractiveWebUI : WebUI
     {
 #pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
-
         private WindowsFormsWebAuthenticationDialog dialog;
+
+        public InteractiveWebUI(object ownerWindow, RequestContext requestContext) 
+            : base(ownerWindow, requestContext)
+        {
+        }
 
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
 
-            using (dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) {RequestContext = RequestContext})
+            using (dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow, RequestContext))
             {
                 result = dialog.AuthenticateAAD(RequestUri, CallbackUri);
             }
 
             return result;
         }
-#pragma warning restore 618
     }
+#pragma warning restore 618
+
 }

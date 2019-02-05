@@ -25,25 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using SafariServices;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 {
     internal class SystemWebUI : WebviewBase, IDisposable
     {
-        public RequestContext RequestContext { get; set; }
+        private readonly RequestContext _requestContext;
 
-        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        public SystemWebUI(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
+
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
         {
             viewController = null;
             InvokeOnMainThread(() =>
@@ -53,7 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             });
 
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, requestContext);
+            Authenticate(authorizationUri, redirectUri);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             //dismiss safariviewcontroller
@@ -65,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             return authorizationResult;
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        private void Authenticate(Uri authorizationUri, Uri redirectUri)
         {
             try
             {
@@ -140,7 +144,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             }
             catch (Exception ex)
             {
-                requestContext.Logger.ErrorPii(ex);
+                _requestContext.Logger.ErrorPii(ex);
                 throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.AuthenticationUiFailedError,
                     "Failed to invoke SFSafariViewController",

@@ -27,6 +27,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -49,13 +50,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
-        {
-            authorizationResult = authorizationResultInput;
-            returnedUriReady.Release();
-        }
+        //TODO: delete
+        //public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        //{
+        //    authorizationResult = authorizationResultInput;
+        //    returnedUriReady.Release();
+        //}
 
-        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri);
 
         public abstract void ValidateRedirectUri(Uri redirectUri);
     }

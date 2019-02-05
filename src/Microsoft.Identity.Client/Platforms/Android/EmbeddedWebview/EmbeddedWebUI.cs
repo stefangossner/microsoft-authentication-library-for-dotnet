@@ -25,28 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase
     {
         private readonly CoreUIParent _coreUIParent;
-        public RequestContext RequestContext { get; internal set; }
+        private readonly RequestContext _requestContext;
 
-        public EmbeddedWebUI(CoreUIParent coreUIParent)
+        public EmbeddedWebUI(CoreUIParent coreUIParent, RequestContext requestContext)
         {
             _coreUIParent = coreUIParent;
+            _requestContext = requestContext;
         }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -60,8 +61,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailedError, 
-                    "AuthenticationActivity failed to start", 
+                    CoreErrorCodes.AuthenticationUiFailedError,
+                    "AuthenticationActivity failed to start",
                     ex);
             }
 

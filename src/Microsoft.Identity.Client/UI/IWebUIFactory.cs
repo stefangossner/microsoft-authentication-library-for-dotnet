@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.UI
 {

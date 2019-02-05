@@ -38,13 +38,20 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase, IDisposable
     {
-        public RequestContext RequestContext { get; internal set; }
-        public CoreUIParent CoreUIParent { get; set; }
+        private readonly CoreUIParent _coreUIParent;
+        private readonly RequestContext _requestContext;
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public EmbeddedWebUI(CoreUIParent coreUIParent, RequestContext requestContext)
+        {
+            this._coreUIParent = coreUIParent;
+            this._requestContext = requestContext;
+        }
+        
+
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, requestContext);
+            Authenticate(authorizationUri, redirectUri);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             return authorizationResult;
@@ -56,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri)
         {
             UIViewController viewController = null;
             InvokeOnMainThread(() =>
@@ -70,10 +77,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 {
                     var navigationController =
                         new MsalAuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                            redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle)
+                            redirectUri.OriginalString, CallbackMethod, _coreUIParent.PreferredStatusBarStyle)
                         {
-                            ModalPresentationStyle = CoreUIParent.ModalPresentationStyle,
-                            ModalTransitionStyle = CoreUIParent.ModalTransitionStyle,
+                            ModalPresentationStyle = _coreUIParent.ModalPresentationStyle,
+                            ModalTransitionStyle = _coreUIParent.ModalTransitionStyle,
                             TransitioningDelegate = viewController.TransitioningDelegate
                         };
 

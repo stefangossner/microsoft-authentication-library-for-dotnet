@@ -29,6 +29,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -36,10 +37,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// <summary>
     /// The browser dialog used for user authentication
     /// </summary>
-    [Obsolete("This type should not be used and will be made internal.")]
-    [ComVisible(true)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
+    internal class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         private int _statusCode;
         private bool _zoomed;
@@ -47,8 +45,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <summary>
         /// Default constructor
         /// </summary>
-        public WindowsFormsWebAuthenticationDialog(object ownerWindow)
-            : base(ownerWindow)
+        public WindowsFormsWebAuthenticationDialog(object ownerWindow, RequestContext requestContext)
+            : base(ownerWindow, requestContext)
         {
             Shown += FormShownHandler;
             WebBrowser.DocumentTitleChanged += WebBrowserDocumentTitleChangedHandler;

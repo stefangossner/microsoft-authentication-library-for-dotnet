@@ -25,33 +25,37 @@
 //
 // ------------------------------------------------------------------------------
 
+using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AppKit;
-using Foundation;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
     internal class MacEmbeddedWebUI : IWebUI
-    {        
+    {
         private SemaphoreSlim _returnedUriReady;
         private AuthorizationResult _authorizationResult;
+        private readonly RequestContext _requestContext;
+        private readonly CoreUIParent _coreUIParent;
 
-        public CoreUIParent CoreUIParent { get; set; }
-        public RequestContext RequestContext { get; set; }
+        public MacEmbeddedWebUI(CoreUIParent coreUIParent, RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+            _coreUIParent = coreUIParent;
+        }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
-            Uri authorizationUri, 
-            Uri redirectUri, 
-            RequestContext requestContext)
+            Uri authorizationUri,
+            Uri redirectUri)
         {
             _returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, requestContext);
+            Authenticate(authorizationUri, redirectUri);
             await _returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             return _authorizationResult;
@@ -63,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             _returnedUriReady.Release();
         }
 
-        private void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        private void Authenticate(Uri authorizationUri, Uri redirectUri)
         {
             try
             {
@@ -75,10 +79,11 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 NSRunLoop.Main.BeginInvokeOnMainThread(() =>
                 {
                     var windowController = new AuthenticationAgentNSWindowController(
-                        authorizationUri.AbsoluteUri, 
-                        redirectUri.OriginalString, 
+                        authorizationUri.AbsoluteUri,
+                        redirectUri.OriginalString,
                         SetAuthorizationResult);
-                    windowController.Run(CoreUIParent.CallerWindow);
+
+                    windowController.Run(_coreUIParent.CallerWindow);
                 });
             }
             catch (Exception ex)
@@ -88,7 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                     "See inner exception for details",
                     ex);
             }
-        }       
+        }
 
         public void ValidateRedirectUri(Uri redirectUri)
         {

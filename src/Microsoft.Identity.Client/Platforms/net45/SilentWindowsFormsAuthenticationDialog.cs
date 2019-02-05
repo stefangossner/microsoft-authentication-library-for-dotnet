@@ -30,16 +30,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    /// <summary>
-    /// </summary>
-    [ComVisible(true)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This type should not be used and will be made internal.")]
-    public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
+    internal class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         private bool doneSignaled;
         private DateTime navigationExpiry = DateTime.MaxValue;
@@ -47,8 +43,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         /// <summary>
         /// </summary>
-        public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
-            : base(ownerWindow)
+        public SilentWindowsFormsAuthenticationDialog(object ownerWindow, RequestContext requestContext)
+            : base(ownerWindow, requestContext)
         {
             SuppressBrowserSubDialogs();
             WebBrowser.DocumentCompleted += DocumentCompletedHandler;

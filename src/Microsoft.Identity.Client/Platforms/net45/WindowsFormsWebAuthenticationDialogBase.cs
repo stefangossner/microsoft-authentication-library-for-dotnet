@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -38,30 +37,22 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    /// <summary>
-    /// </summary>
-    [ComVisible(true)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This type should not be used and will be made internal.")]
-    public abstract class WindowsFormsWebAuthenticationDialogBase : Form
+    internal abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
-        internal RequestContext RequestContext { get; set; }
-
         private const int UIWidth = 566;
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
         private readonly CustomWebBrowser _webBrowser;
+        private readonly RequestContext _requestContext;
         private Uri _desiredCallbackUri;
         private Keys _key = Keys.None;
 
-        /// <summary>
-        /// </summary>
         protected IWin32Window ownerWindow { get; set; }
 
         private Panel _webBrowserPanel;
 
         /// <summary>
         /// </summary>
-        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
+        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow, RequestContext requestContext)
         {
             // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
             // The net session count tracks the number of instances of the web browser control. 
@@ -98,6 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             _webBrowser = new CustomWebBrowser();
             _webBrowser.PreviewKeyDown += WebBrowser_PreviewKeyDown;
             InitializeComponent();
+            this._requestContext = requestContext;
         }
 
         internal AuthorizationResult Result { get; set; }
@@ -156,7 +148,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             if (!e.Cancel)
             {
                 string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
-                RequestContext.Logger.VerbosePii(
+                _requestContext.Logger.VerbosePii(
                     string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", urlDecode),
                     string.Empty);
             }
@@ -171,7 +163,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
-            RequestContext.Logger.VerbosePii(
+            _requestContext.Logger.VerbosePii(
                 string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", urlDecode),
                 string.Empty);
         }
@@ -218,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             if (url.Authority.Equals(_desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
-                RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
+                _requestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
                 Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
             }
@@ -226,7 +218,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) && !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
             {
-                RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
+                _requestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
@@ -256,14 +248,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     return;
                 }
 
-                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                _requestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                     "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                     _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
                     _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
 
                 _webBrowser.Stop();
 
-                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                _requestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                     "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                     _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
                     _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));

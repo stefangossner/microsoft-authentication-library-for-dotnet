@@ -25,27 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
 using System;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal abstract class WebUI : IWebUI
     {
+
         protected Uri RequestUri { get; private set; }
         protected Uri CallbackUri { get; private set; }
-        public object OwnerWindow { get; set; }
+        protected object OwnerWindow { get; }
+        protected RequestContext RequestContext { get; }
 
-        public RequestContext RequestContext { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        protected WebUI(object ownerWindow, RequestContext requestContext)
+        {
+            OwnerWindow = ownerWindow;
+            RequestContext = requestContext;
+        }
+
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
         {
             AuthorizationResult authorizationResult = null;
 
@@ -65,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     }
                     catch (AggregateException ae)
                     {
-                        requestContext.Logger.ErrorPii(ae.InnerException);
+                        RequestContext.Logger.ErrorPii(ae.InnerException);
                         // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                         // actual exception as inner.
                         Exception innerException = ae.InnerExceptions[0];
@@ -88,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
         }
 
-        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
+        private AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
         {
             RequestUri = requestUri;
             CallbackUri = callbackUri;

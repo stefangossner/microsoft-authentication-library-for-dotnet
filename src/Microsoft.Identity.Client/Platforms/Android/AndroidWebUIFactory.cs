@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 using Microsoft.Identity.Client.UI;
@@ -37,16 +38,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             if (coreUIParent.UseEmbeddedWebview)
             {
-                return new EmbeddedWebUI(coreUIParent)
-                {
-                    RequestContext = requestContext
-                };
+                return new EmbeddedWebUI(coreUIParent, requestContext);
             }
 
-            return new SystemWebUI(coreUIParent)
-            {
-                RequestContext = requestContext
-            };
+            return new SystemWebUI(coreUIParent, requestContext);
         }
     }
 }

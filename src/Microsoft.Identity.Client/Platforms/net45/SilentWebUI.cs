@@ -28,6 +28,7 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 
@@ -56,7 +57,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private ManualResetEvent threadInitializedEvent;
         private Exception uiException;
 
-        public SilentWebUI()
+        public SilentWebUI(object ownerWindow, RequestContext requestContext) : 
+            base(ownerWindow, requestContext)
         {
             threadInitializedEvent = new ManualResetEvent(false);
         }
@@ -116,10 +118,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                         formsSyncContext = new WindowsFormsSynchronizationContext();
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
-                        dialog = new SilentWindowsFormsAuthenticationDialog(OwnerWindow)
+                        dialog = new SilentWindowsFormsAuthenticationDialog(OwnerWindow, RequestContext)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs,
-                            RequestContext = RequestContext
                         };
 #pragma warning restore 618
 

@@ -25,16 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -42,17 +43,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
     {
         private readonly bool useCorporateNetwork;
         private readonly bool silentMode;
-
-        public RequestContext RequestContext { get; set; }
+        private readonly RequestContext _requestContext;
 
         public WebUI(CoreUIParent parent, RequestContext requestContext)
         {
             useCorporateNetwork = parent.UseCorporateNetwork;
             silentMode = parent.UseHiddenBrowser;
+            _requestContext = requestContext;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
         {
             bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
 
@@ -93,12 +93,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             catch (Exception ex)
             {
-                requestContext.Logger.ErrorPii(ex);
+                _requestContext.Logger.ErrorPii(ex);
                 throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
                     ex);
             }
 
-            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);
+            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, _requestContext);
 
             return result;
         }

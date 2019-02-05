@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -36,10 +37,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             if (parent.UseHiddenBrowser)
             {
-                return new SilentWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
+                return new SilentWebUI(parent?.OwnerWindow, requestContext);
             }
 
-            return new InteractiveWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
+            return new InteractiveWebUI(parent?.OwnerWindow, requestContext);
         }
     }
 }

@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Uri = System.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
@@ -41,15 +41,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
     internal class SystemWebUI : WebviewBase
     {
         private readonly CoreUIParent _parent;
+        private readonly RequestContext _requestContext;
 
-        public SystemWebUI(CoreUIParent parent)
+        public SystemWebUI(CoreUIParent parent, RequestContext requestContext)
         {
             _parent = parent;
+            _requestContext = requestContext;
         }
 
-        public RequestContext RequestContext { get; set; }
-
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri )
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -58,15 +58,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
-                AuthenticationActivity.RequestContext = RequestContext;
-                _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
+                AuthenticationActivity.RequestContext = _requestContext;
+                _parent.Activity.RunOnUiThread(() => _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)
             {
-                requestContext.Logger.ErrorPii(ex);
+                _requestContext.Logger.ErrorPii(ex);
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailedError, 
-                    "AuthenticationActivity failed to start", 
+                    CoreErrorCodes.AuthenticationUiFailedError,
+                    "AuthenticationActivity failed to start",
                     ex);
             }
 
