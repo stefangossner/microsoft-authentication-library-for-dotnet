@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Method called by MSAL.NET to validate the redirect URI passed when constructing the <see cref="PublicClientApplication"/>
         /// Not all implementations of this interface require a redirect uri, so 
         /// </summary>
-        /// <remarks>Implementers should return </remarks>
+        /// <remarks>Implementers should throw an MsalClientException explaining why the uri is wrong. </remarks>
         void ValidateRedirectUri(Uri redirectUri);
     }
 }
