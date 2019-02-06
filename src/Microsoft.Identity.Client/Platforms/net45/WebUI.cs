@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             RequestContext = requestContext;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
+        public async Task<Uri> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken)
         {
             AuthorizationResult authorizationResult = null;
 

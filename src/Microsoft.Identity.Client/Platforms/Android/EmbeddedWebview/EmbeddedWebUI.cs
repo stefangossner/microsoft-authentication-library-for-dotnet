@@ -47,10 +47,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             _requestContext = requestContext;
         }
 
-        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
+        public override async Task<Uri> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            CancellationToken cancellationToken)
         {
-            returnedUriReady = new SemaphoreSlim(0);
+            cancellationToken.ThrowIfCancellationRequested();
 
+            ReturnedUriReady = new SemaphoreSlim(0);
             try
             {
                 var agentIntent = new Intent(_coreUIParent.CallerActivity, typeof(AuthenticationAgentActivity));
@@ -66,8 +70,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     ex);
             }
 
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
-            return authorizationResult;
+            await ReturnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return AuthCodeUri;
         }
 
         public override void ValidateRedirectUri(Uri redirectUri)

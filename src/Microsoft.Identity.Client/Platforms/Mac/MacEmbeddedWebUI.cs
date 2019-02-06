@@ -50,13 +50,15 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             _coreUIParent = coreUIParent;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
-            Uri authorizationUri,
-            Uri redirectUri)
+        public async Task<Uri> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            CancellationToken cancellationToken)
         {
             _returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri);
-            await _returnedUriReady.WaitAsync().ConfigureAwait(false);
+
+            await _returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             return _authorizationResult;
         }

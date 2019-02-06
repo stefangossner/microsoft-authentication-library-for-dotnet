@@ -32,6 +32,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Networking.Connectivity;
@@ -52,8 +53,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
             _requestContext = requestContext;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri)
+        public async Task<Uri> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
 
             WebAuthenticationResult webAuthenticationResult;
@@ -77,20 +80,19 @@ namespace Microsoft.Identity.Client.Platforms.uap
                             {
                                 return await
                                     WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
-                                        .AsTask()
+                                        .AsTask(cancellationToken)
                                         .ConfigureAwait(false);
                             }
                             else
                             {
                                 return await WebAuthenticationBroker
                                     .AuthenticateAsync(options, authorizationUri, redirectUri)
-                                    .AsTask()
+                                    .AsTask(cancellationToken)
                                     .ConfigureAwait(false);
                             }
                         })
                     .ConfigureAwait(false);
             }
-
             catch (Exception ex)
             {
                 _requestContext.Logger.ErrorPii(ex);
@@ -115,28 +117,28 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
         }
 
-        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,
+        private static Uri ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,
             RequestContext requestContext)
         {
-            AuthorizationResult result;
+            Uri result;
             switch (webAuthenticationResult.ResponseStatus)
             {
                 case WebAuthenticationStatus.Success:
-                    result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
-                    break;
+                    return new Uri(webAuthenticationResult.ResponseData);
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                        webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
-                    break;
-                case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
-                    break;
-                default:
-                    result = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
-                    break;
-            }
+                    return null;
 
-            return result;
+                    // TODO: bogavril - decide on the exception to throw
+                    //result = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
+                    //    webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
+                case WebAuthenticationStatus.UserCancel:
+                    return null;
+
+                    //result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                default:
+                    //result = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    return null;
+            }
         }
 
 

@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 driver.PerformLogin(labResponse.User);
             };
 
-            SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
+            var webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
 
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
                                                                         .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())

@@ -43,6 +43,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 {
                     taskCompletionSource.SetResult(await func().ConfigureAwait(false));
                 }
+                catch (OperationCanceledException)
+                {
+                    taskCompletionSource.SetCanceled();
+                }
                 catch (Exception ex)
                 {
                     taskCompletionSource.SetException(ex);

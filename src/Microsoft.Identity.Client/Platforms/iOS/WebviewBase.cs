@@ -59,10 +59,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
         }
 
-
+        #region IWebUI
         public abstract void ValidateRedirectUri(Uri redirectUri);
 
-        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri);
+        public abstract Task<Uri> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
+        #endregion
 
         public static bool ContinueAuthentication(string url)
         {

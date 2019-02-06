@@ -30,6 +30,7 @@ using System.Globalization;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
@@ -56,62 +57,48 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = new RequestContext(null, MsalLogger.Create(Guid.Empty, null));
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
-            AuthorizationResult authorizationResult = null;
-
-            int code = (int)resultCode;
+            Uri returnUri;
 
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
-                authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
+                returnUri = ProcessFromEmbeddedWebview(resultCode, data);
             }
             else
             {
-                authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
+                returnUri = ProcessFromSystemWebview(resultCode, data);
             }
 
-            WebviewBase.SetAuthorizationResult(authorizationResult, requestContext);
+            WebviewBase.SetAuthCodeUri(returnUri, requestContext);
         }
 
-        private static AuthorizationResult ProcessFromEmbeddedWebview(int requestCode, Result resultCode, Intent data)
+        private static Uri ProcessFromEmbeddedWebview(Result resultCode, Intent data)
         {
             switch ((int)resultCode)
             {
                 case (int)Result.Ok:
-                    return new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl"));
+                    return new Uri(data.GetStringExtra("ReturnedUrl"));
 
                 case (int)Result.Canceled:
-                    return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    throw new OperationCanceledException();
 
                 default:
-                    return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    throw new MsalServiceException(CoreErrorCodes.UnknownError, CoreErrorMessages.Unknown);
             }
         }
 
-        private static AuthorizationResult ProcessFromSystemWebview(int requestCode, Result resultCode, Intent data)
+        private static Uri ProcessFromSystemWebview(Result resultCode, Intent data)
         {
             switch ((int)resultCode)
             {
                 case AndroidConstants.AuthCodeReceived:
-                    return CreateResultForOkResponse(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
+                    return new Uri(data.GetStringExtra("com.microsoft.identity.client.finalUrl");
 
                 case AndroidConstants.Cancel:
-                    return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    throw new OperationCanceledException();
 
                 default:
-                    return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    throw new MsalServiceException(CoreErrorCodes.UnknownError, CoreErrorMessages.Unknown);
             }
-        }
-
-        private static AuthorizationResult CreateResultForOkResponse(string url)
-        {
-            AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.Success);
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                result.ParseAuthorizeResponse(url);
-            }
-
-            return result;
         }
     }
 }

@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -52,7 +51,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="redirectUri">The redirect Uri which was configured when constructing the <see cref="PublicClientApplication"/>
         /// Not all implementers of this interface require this information.
         /// </param>
-        /// 
+        /// <param name="cancelationToken">standard task cancellation mechanism</param>
         /// <returns>
         ///     The URI returned back from the STS authorization endpoint. This URI contains a code=CODE
         ///     parameters that MSAL.NET will extract.
@@ -64,7 +63,10 @@ namespace Microsoft.Identity.Client.Extensibility
         ///     
         ///     //TODO bogavril - add details about exceptions to be thrown
         /// </remarks>
-        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri); //TODO: bogavril - add cancellation token?
+        Task<Uri> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri,
+            CancellationToken cancelationToken); //TODO: bogavril - add cancellation token?
 
         /// <summary>
         /// Method called by MSAL.NET to validate the redirect URI passed when constructing the <see cref="PublicClientApplication"/>

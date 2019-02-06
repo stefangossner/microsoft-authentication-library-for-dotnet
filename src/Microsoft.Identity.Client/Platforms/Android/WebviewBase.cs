@@ -34,15 +34,15 @@ namespace Microsoft.Identity.Client.Platforms.Android
 {
     internal abstract class WebviewBase : IWebUI
     {
-        protected static SemaphoreSlim returnedUriReady;
-        protected static AuthorizationResult authorizationResult;
+        protected static SemaphoreSlim ReturnedUriReady { get; set; }
+        protected static Uri AuthCodeUri { get; private set; }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
+        public static void SetAuthCodeUri(Uri uri, RequestContext requestContext)
         {
-            if (returnedUriReady != null)
+            if (ReturnedUriReady != null)
             {
-                authorizationResult = authorizationResultInput;
-                returnedUriReady.Release();
+                AuthCodeUri = uri;
+                ReturnedUriReady.Release();
             }
             else
             {
@@ -50,14 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        //TODO: delete
-        //public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
-        //{
-        //    authorizationResult = authorizationResultInput;
-        //    returnedUriReady.Release();
-        //}
-
-        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri);
+        public abstract Task<Uri> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
 
         public abstract void ValidateRedirectUri(Uri redirectUri);
     }

@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
@@ -237,6 +238,12 @@ namespace Microsoft.Identity.Client
             AcquireTokenInteractiveParameters interactiveParameters,
             RequestContext requestContext)
         {
+            //TODO: bogavril - how to hook this up?
+            //if (interactiveParameters.CustomWebUi != null)
+            //{
+            //    return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
+            //}
+
             var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
 
 #if ANDROID || iOS
