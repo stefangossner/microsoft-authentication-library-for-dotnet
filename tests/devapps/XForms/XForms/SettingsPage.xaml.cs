@@ -133,5 +133,17 @@ namespace XForms
             App.RedirectUriOnAndroid = App.RedirectUriB2C;
             App.RedirectUriOnIos = App.RedirectUriB2C;
         }
+
+        private void OnAcquireTokenWithBrokerToggled(object sender, ToggledEventArgs args)
+        {
+            if (App.UseBroker = args.Value)
+            {
+                App.InitPublicClientWithBroker();
+            }
+            else
+            {
+                App.InitPublicClient();
+            }
+        }
     }
 }

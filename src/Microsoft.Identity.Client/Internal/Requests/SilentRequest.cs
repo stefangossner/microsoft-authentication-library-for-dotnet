@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenSilentParameters _silentParameters;
         private AuthenticationRequestParameters _authenticationRequestParameters;
         BrokerFactory brokerFactory = new BrokerFactory();
-        IBroker Broker;
+        private IBroker Broker;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -127,14 +127,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> CheckForBrokerAndSendTokenRequestAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
         {
-            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle.DefaultLogger);
+            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
             MsalTokenResponse msalTokenResponse;
 
-            if (Broker.CanInvokeBroker(new ApiConfig.OwnerUiParent(), ServiceBundle))
+            if (Broker.CanInvokeBroker(new ApiConfig.OwnerUiParent()))
             {
                 msalTokenResponse = await Broker.AcquireTokenUsingBrokerAsync(
-                    CreateBrokerPayload(),
-                    ServiceBundle).ConfigureAwait(false);
+                    _authenticationRequestParameters.CreateSilentRequestParametersForBroker()).ConfigureAwait(false);
             }
             else
             {
@@ -143,12 +142,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return msalTokenResponse;
-        }
-
-        private Dictionary<string, string> CreateBrokerPayload()
-        {
-            Dictionary<string, string> brokerPayload = _authenticationRequestParameters.CreateSilentRequestParametersForBroker();
-            return brokerPayload;
         }
     }
 }
