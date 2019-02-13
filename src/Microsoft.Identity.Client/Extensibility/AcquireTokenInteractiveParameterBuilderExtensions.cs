@@ -25,33 +25,28 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ApiConfig;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Extensibility
 {
-    internal interface IConfidentialClientApplicationExecutor
+    /// <summary>
+    /// </summary>
+    public static class AcquireTokenInteractiveParameterBuilderExtensions
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenForClientParameters clientParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
-            CancellationToken cancellationToken);
-
-        Task<Uri> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken);
+        /// <summary>
+        ///     Extension method enabling MSAL.NET extenders for public client applications to set a custom web ui
+        ///     that will let the user sign-in with Azure AD, present consent if needed, and get back the authorization
+        ///     code
+        /// </summary>
+        /// <param name="builder">Builder for an AcquireTokenInteractive</param>
+        /// <param name="customWebUi">Customer implementation for the Web UI</param>
+        /// <returns>the builder to be able to chain .With methods</returns>
+        public static AcquireTokenInteractiveParameterBuilder WithCustomWebUi(
+            this AcquireTokenInteractiveParameterBuilder builder,
+            ICustomWebUi customWebUi)
+        {
+            builder.SetCustomWebUi(customWebUi);
+            return builder;
+        }
     }
 }
