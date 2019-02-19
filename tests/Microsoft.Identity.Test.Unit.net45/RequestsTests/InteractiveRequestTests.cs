@@ -522,13 +522,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
-                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     new TokenCache(harness.ServiceBundle),
                     extraQueryParameters: MsalTestConstants.ExtraQueryParams,
                     claims: MsalTestConstants.Claims);
-                
+
                 parameters.IsBrokerEnabled = true;
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
@@ -551,7 +551,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenType = "Bearer"
                 };
 
-                request.CheckResponseFromBroker(response);
+                request.ValidateResponseFromBroker(response);
 
                 Assert.IsNotNull(request);
             }
@@ -590,7 +590,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 try
                 {
-                    request.CheckResponseFromBroker(response);
+                    request.ValidateResponseFromBroker(response);
 
                     Assert.Fail("MsalServiceException should have been thrown here");
                 }
@@ -636,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 try
                 {
-                    request.CheckResponseFromBroker(response);
+                    request.ValidateResponseFromBroker(response);
 
                     Assert.Fail("MsalServiceException should have been thrown here");
                 }

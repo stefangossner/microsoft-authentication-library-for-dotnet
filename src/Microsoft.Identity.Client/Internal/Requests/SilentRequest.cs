@@ -40,9 +40,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class SilentRequest : RequestBase
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private AuthenticationRequestParameters _authenticationRequestParameters;
-        BrokerFactory brokerFactory = new BrokerFactory();
-        private IBroker Broker;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -51,7 +48,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
             _silentParameters = silentParameters;
-            _authenticationRequestParameters = authenticationRequestParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -93,8 +89,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
-            var msalTokenResponse = await CheckForBrokerAndSendTokenRequestAsync(msalRefreshTokenItem, cancellationToken)
-                                        .ConfigureAwait(false);
+            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+                                    .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
             {
@@ -123,25 +119,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             };
 
             return dict;
-        }
-
-        private async Task<MsalTokenResponse> CheckForBrokerAndSendTokenRequestAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
-        {
-            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
-            MsalTokenResponse msalTokenResponse;
-
-            if (Broker.CanInvokeBroker(new ApiConfig.OwnerUiParent()))
-            {
-                msalTokenResponse = await Broker.AcquireTokenUsingBrokerAsync(
-                    _authenticationRequestParameters.CreateSilentRequestParametersForBroker()).ConfigureAwait(false);
-            }
-            else
-            {
-               msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
-                                        .ConfigureAwait(false);
-            }
-
-            return msalTokenResponse;
         }
     }
 }

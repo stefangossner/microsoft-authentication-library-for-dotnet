@@ -51,10 +51,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _codeVerifier;
         private string _state;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
-        private AuthenticationRequestParameters _authenticationRequestParameters;
+        private MsalTokenResponse _msalTokenResponse;
+
         BrokerFactory brokerFactory = new BrokerFactory();
         private IBroker Broker;
-        private MsalTokenResponse _msalTokenResponse;
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -63,7 +63,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IWebUI webUi)
             : base(serviceBundle, authenticationRequestParameters, interactiveParameters)
         {
-            _authenticationRequestParameters = authenticationRequestParameters;
             _interactiveParameters = interactiveParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
             webUi?.ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
@@ -78,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ValidateScopeInput(_extraScopesToConsent);
 
             _webUi = webUi;
-            _interactiveParameters.LogParameters(_authenticationRequestParameters.RequestContext.Logger);
+            _interactiveParameters.LogParameters(authenticationRequestParameters.RequestContext.Logger);
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
@@ -94,9 +93,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
-            await CheckForBrokerAndAcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            {
+                _msalTokenResponse = await CheckForBrokerAndSendTokenRequestAsync().ConfigureAwait(false);
+            }
+            else
+            { 
+                await AcquireAuthorizationAsync().ConfigureAwait(false);
+                VerifyAuthorizationResult();
+                _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            }
 
             return CacheTokenResponseAndCreateAuthenticationResult(_msalTokenResponse);
+        }
+
+        private async Task<MsalTokenResponse> CheckForBrokerAndSendTokenRequestAsync()
+        {
+            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
+
+            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent))
+            {
+                return await Broker.AcquireTokenUsingBrokerAsync(
+                    AuthenticationRequestParameters.CreateRequestParametersForBroker()).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new MsalServiceException(
+                    CoreErrorCodes.CannotInvokeBroker,
+                    MsalErrorMessage.CannotInvokeBroker);
+            }
         }
 
         private async Task AcquireAuthorizationAsync()
@@ -274,23 +299,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
                 throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription, null);
-            }
-        }
-
-        private async Task CheckForBrokerAndAcquireAuthorizationAsync(CancellationToken cancellationToken)
-        {
-            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
-
-            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent))
-            {
-                _msalTokenResponse = await Broker.AcquireTokenUsingBrokerAsync(
-                    _authenticationRequestParameters.CreateRequestParametersForBroker()).ConfigureAwait(false);
-            }
-            else
-            {
-                await AcquireAuthorizationAsync().ConfigureAwait(false);
-                VerifyAuthorizationResult();
-                _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             }
         }
     }

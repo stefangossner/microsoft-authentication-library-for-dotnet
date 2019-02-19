@@ -136,5 +136,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string ActivityRequired = "On the Android platform, you have to pass the Activity to the UIParent object. See https://aka.ms/msal-interactive-android for details.";
         public const string BrokerResponseReturnedError = "Broker response returned an error which does not contain an error or error description. See https://aka.ms/msal-brokers for details. ";
         public const string BrokerResponseError = "Broker response returned error: ";
+        public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+            "Check logs for more details and see https://aka.ms/msal-brokers. ";
     }
 }

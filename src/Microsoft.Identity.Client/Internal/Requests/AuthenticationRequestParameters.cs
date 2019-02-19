@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IDictionary<string, string> ExtraQueryParameters { get; }
         public string Claims { get; }
 
-        public bool IsBrokerEnabled { get; set; }
+        internal bool IsBrokerEnabled { get; set; }
 
 #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
@@ -155,17 +155,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             brokerPayload.Add(BrokerParameter.Username, Account?.Username ?? string.Empty);
             brokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-
-            return brokerPayload;
-        }
-
-        public Dictionary<string, string> CreateSilentRequestParametersForBroker()
-        {
-            Dictionary<string, string> brokerPayload;
-
-            brokerPayload = (CreateRequestParametersForBroker());
-
-            brokerPayload.Add(BrokerParameter.SilentBrokerFlow, null);
 
             return brokerPayload;
         }

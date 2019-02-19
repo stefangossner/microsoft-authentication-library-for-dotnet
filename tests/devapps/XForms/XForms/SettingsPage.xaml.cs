@@ -136,14 +136,8 @@ namespace XForms
 
         private void OnAcquireTokenWithBrokerToggled(object sender, ToggledEventArgs args)
         {
-            if (App.UseBroker = args.Value)
-            {
-                App.InitPublicClientWithBroker();
-            }
-            else
-            {
-                App.InitPublicClient();
-            }
+            App.UseBroker = args.Value;
+            App.InitPublicClient();
         }
     }
 }

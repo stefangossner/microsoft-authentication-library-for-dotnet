@@ -43,7 +43,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
@@ -192,40 +191,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.IsNotNull(exc, "Actual exception type is " + ae.InnerException.GetType());
                     Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
                 }
-            }
-        }
-
-        [TestMethod]
-        [Description("Test setting of the broker parameters in the BrokerSilentRequest constructor.")]
-        public void BrokerSilentRequest_CreateBrokerParametersTest()
-        {
-            using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
-            {
-                // Arrange
-                var parameters = harness.CreateRequestParams(
-                    harness.Cache,
-                    MsalTestConstants.Scope,
-                    MsalTestConstants.ExtraQueryParams);
-
-                // Act
-                var brokerParameters = parameters.CreateSilentRequestParametersForBroker();
-
-                // Assert
-                Assert.AreEqual(11, brokerParameters.Count);
-
-                Assert.AreEqual(harness.Authority.AuthorityInfo.CanonicalAuthority, brokerParameters[BrokerParameter.Authority]);
-                Assert.AreEqual(MsalTestConstants.ScopeStr, brokerParameters[BrokerParameter.RequestScopes]);
-                Assert.AreEqual(MsalTestConstants.ClientId, brokerParameters[BrokerParameter.ClientId]);
-
-                Assert.AreEqual(harness.ServiceBundle.DefaultLogger.CorrelationId.ToString(), brokerParameters[BrokerParameter.CorrelationId]);
-                Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerParameters[BrokerParameter.ClientVersion]);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, brokerParameters[BrokerParameter.Username]);
-
-                Assert.AreEqual(MsalTestConstants.BrokerExtraQueryParameters, brokerParameters[BrokerParameter.ExtraQp]);
-
-                // Assert.AreEqual(MsalTestConstants.BrokerClaims, brokerParameters[BrokerParameter.Claims]);
-                Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerParameters[BrokerParameter.ExtraOidcScopes]);
-                Assert.IsTrue(brokerParameters.ContainsKey(BrokerParameter.SilentBrokerFlow));
             }
         }
 

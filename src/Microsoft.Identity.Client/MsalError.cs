@@ -206,6 +206,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerReponseReturnedError = "broker_response_returned_error";
 
         /// <summary>
+        /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device, 
+        /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
+        /// </summary>
+        public const string CannotInvokeBroker = "cannot_invoke_broker";
+
+        /// <summary>
         /// Error code used when the http response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

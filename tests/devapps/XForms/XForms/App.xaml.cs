@@ -95,43 +95,25 @@ namespace XForms
                 LogLevel.Verbose,
                 true);
 
-            // Let Android set its own redirect uri
-            switch (Device.RuntimePlatform)
+            if (UseBroker)
             {
-                case "iOS":
-                    builder.WithRedirectUri(RedirectUriOnIos);
-                    break;
-                case "Android":
-                    builder.WithRedirectUri(RedirectUriOnAndroid);
-                    break;
+                //builder.WithBroker(true);
+                builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
+                builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
-            MsalPublicClient = builder.BuildConcrete();
-        }
-
-        public static void InitPublicClientWithBroker()
-        {
-            var builder = PublicClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(new Uri(Authority), ValidateAuthority)
-                .WithLogging((level, message, pii) =>
-                {
-                    Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
-                },
-                LogLevel.Verbose,
-                true)
-                //.WithBroker(true)
-                .WithIosKeychainSecurityGroup("com.microsoft.adalcache");
-
-            // Let Android set its own redirect uri
-            switch (Device.RuntimePlatform)
+            else
             {
-                case "iOS":
-                    builder.WithRedirectUri(BrokerRedirectUriOnIos);
-                    break;
-                case "Android":
-                    builder.WithRedirectUri(RedirectUriOnAndroid);
-                    break;
+                 // Let Android set its own redirect uri
+                switch (Device.RuntimePlatform)
+                {
+                    case "iOS":
+                        builder.WithRedirectUri(RedirectUriOnIos);
+                        break;
+                    case "Android":
+                        builder.WithRedirectUri(RedirectUriOnAndroid);
+                        break;
+                }
             }
 
             MsalPublicClient = builder.BuildConcrete();

@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string Force = "force";
         
-        public const string SilentBrokerFlow = "silent_broker_flow";
         public const string BrokerInstallUrl = "broker_install_url";
     }
 }
