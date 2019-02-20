@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public const string BrokerReponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
+        public const string BrokerResponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
 
 #if iOS
         /// <summary>

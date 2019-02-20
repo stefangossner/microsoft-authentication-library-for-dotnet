@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string LoginHintNullForUiOption = "Null login_hint is not allowed for Prompt.ActAsCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
 
-        public const string BrokerReponseHashMismatch =
+        public const string BrokerResponseHashMismatch =
             "Unencrypted broker response hash did not match the expected hash";
 
         public const string StsMetadataRequestFailed =

@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 else
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-                    throw new MsalServiceException(MsalError.BrokerReponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+                    throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
                 }
             }
         }

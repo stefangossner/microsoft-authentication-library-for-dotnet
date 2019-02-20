@@ -209,8 +209,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 brokerTokenResponse = new MsalTokenResponse
                 {
-                    Error = MsalError.BrokerReponseHashMismatch,
-                    ErrorDescription = MsalClientException.BrokerReponseHashMismatch
+                    Error = MsalError.BrokerResponseHashMismatch,
+                    ErrorDescription = MsalClientException.BrokerResponseHashMismatch
                 };
             }
 

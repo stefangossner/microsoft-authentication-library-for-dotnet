@@ -198,12 +198,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Broker response hash did not match
         /// </summary>
-        public const string BrokerReponseHashMismatch = "broker_response_hash_mismatch";
+        public const string BrokerResponseHashMismatch = "broker_response_hash_mismatch";
 
         /// <summary>
         /// Broker response returned an error
         /// </summary>
-        public const string BrokerReponseReturnedError = "broker_response_returned_error";
+        public const string BrokerResponseReturnedError = "broker_response_returned_error";
 
         /// <summary>
         /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device, 
