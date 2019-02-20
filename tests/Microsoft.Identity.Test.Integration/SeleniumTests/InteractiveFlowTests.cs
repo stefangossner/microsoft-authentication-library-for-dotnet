@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.Unit;
 using System.Globalization;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -20,6 +21,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class InteractiveFlowTests
     {
         private readonly TimeSpan _seleniumTimeout = TimeSpan.FromMinutes(2);
+        private TokenCache cache;
 
         #region MSTest Hooks
         /// <summary>
@@ -46,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -63,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -79,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -96,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -112,7 +114,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -128,7 +130,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -144,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -160,7 +162,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -176,10 +178,69 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
+            await RunTestForUserInteractiveAsync(labResponse, true).ConfigureAwait(false);
         }
 
-        private async Task RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
+        [TestMethod]
+        public async Task MultiUserCacheCompatabilityTestAsync()
+        {
+            // Arrange
+            cache = new TokenCache();
+
+            LabResponse labResponseDefault = LabUserHelper.GetDefaultUser();
+            var defaultAccountResult = await RunTestForUserInteractiveAsync(labResponseDefault).ConfigureAwait(false);
+
+            UserQuery FederatedUserquery = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponseFederated = LabUserHelper.GetLabUserData(FederatedUserquery);
+            var federatedAccountResult = await RunTestForUserInteractiveAsync(labResponseFederated, true).ConfigureAwait(false);
+
+            UserQuery MSAUserquery = new UserQuery
+            {
+                UserSearch = LabApiConstants.MSAOutlookAccount,
+                IsExternalUser = true,
+                AppName = "Lab4V2App"
+            };
+
+            LabResponse labResponseMsa = LabUserHelper.GetLabUserData(MSAUserquery);
+            labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
+            var msaAccountResult = await RunTestForUserInteractiveAsync(labResponseMsa).ConfigureAwait(false);
+
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
+            pca.UserTokenCacheInternal = cache;
+
+            AuthenticationResult authResult = await pca.AcquireTokenSilentAsync(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account).ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+
+            pca = PublicClientApplicationBuilder.Create(labResponseFederated.AppId).BuildConcrete();
+            pca.UserTokenCacheInternal = cache;
+
+            authResult = await pca.AcquireTokenSilentAsync(new[] { CoreUiTestConstants.DefaultScope },
+                   federatedAccountResult.Account).ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNull(authResult.IdToken);
+
+            pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
+            pca.UserTokenCacheInternal = cache;
+
+            authResult = await pca.AcquireTokenSilentAsync(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account).ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNull(authResult.IdToken);
+
+            cache = null;
+        }
+
+        private async Task<AuthenticationResult> RunTestForUserInteractiveAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             Action<IWebDriver> seleniumLogic = (driver) =>
             {
@@ -188,7 +249,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
-
 
             PublicClientApplication pca;
             if(directToAdfs)
@@ -204,14 +264,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                                                     .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
                                                     .BuildConcrete();
             }
+            if (cache != null)
+            {
+                cache.SetServiceBundle(pca.ServiceBundle);
+                pca.UserTokenCacheInternal = cache;
+            }
 
             pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
 
             // Act
-            AuthenticationResult result = await pca.AcquireTokenAsync(new[] {"user.Read"}).ConfigureAwait(false);
+            AuthenticationResult result = await pca.AcquireTokenAsync(new[] { CoreUiTestConstants.DefaultScope }).ConfigureAwait(false);
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
+
+            return result;
         }
     }
 
