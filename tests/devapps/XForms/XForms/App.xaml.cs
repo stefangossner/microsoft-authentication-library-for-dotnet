@@ -114,6 +114,10 @@ namespace XForms
                         builder.WithRedirectUri(RedirectUriOnAndroid);
                         break;
                 }
+
+#if BUILDENV == APPCENTER
+                builder.WithIosKeychainSecurityGroup("*");
+#endif
             }
 
             MsalPublicClient = builder.BuildConcrete();
