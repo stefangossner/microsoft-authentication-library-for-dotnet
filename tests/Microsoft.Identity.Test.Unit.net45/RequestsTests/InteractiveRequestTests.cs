@@ -520,94 +520,96 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void BrokerResponseTest()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            // Arrange
+            InteractiveRequest request = CreateAuthenticationRequestParametersWithBrokerEnabled();
+
+            var response = new MsalTokenResponse
             {
-                    AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
-                    new TokenCache(harness.ServiceBundle),
-                    extraQueryParameters: MsalTestConstants.ExtraQueryParams,
-                    claims: MsalTestConstants.Claims);
+                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = MsalTestConstants.Scope.AsSingleString(),
+                TokenType = "Bearer"
+            };
 
-                parameters.IsBrokerEnabled = true;
+            // Act
+            request.ValidateResponseFromBroker(response);
 
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
-
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    interactiveParameters,
-                    new MockWebUI());
-
-                var response = new MsalTokenResponse
-                {
-                    IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
-                    AccessToken = "access-token",
-                    ClientInfo = MockHelpers.CreateClientInfo(),
-                    ExpiresIn = 3599,
-                    CorrelationId = "correlation-id",
-                    RefreshToken = "refresh-token",
-                    Scope = MsalTestConstants.Scope.AsSingleString(),
-                    TokenType = "Bearer"
-                };
-
-                request.ValidateResponseFromBroker(response);
-
-                Assert.IsNotNull(request);
-            }
+            // Assert
+            Assert.IsNotNull(request);
+            Assert.IsTrue(request.AuthenticationRequestParameters.IsBrokerEnabled);
         }
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void BrokerErrorResponseTest()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            var response = new MsalTokenResponse
             {
-                // Arrange
-                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
-                    new TokenCache(harness.ServiceBundle),
-                    extraQueryParameters: MsalTestConstants.ExtraQueryParams,
-                    claims: MsalTestConstants.Claims);
+                Error = "MSALErrorDomain",
+                ErrorDescription = "error_description: Server returned less scopes than requested"
+            };
 
-                parameters.IsBrokerEnabled = true;
-
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
-
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    interactiveParameters,
-                    new MockWebUI());
-
-                var response = new MsalTokenResponse
+            ValidateBrokerResponse(
+                response,
+                exception =>
                 {
-                    Error = "MSALErrorDomain",
-                    ErrorDescription = "error_description: Server returned less scopes than requested"
-                };
-
-                // Act
-                try
-                {
-                    request.ValidateResponseFromBroker(response);
-
-                    Assert.Fail("MsalServiceException should have been thrown here");
-                }
-                // Assert
-                catch (MsalServiceException exc)
-                { 
+                    var exc = exception as MsalServiceException;
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(response.Error, exc.ErrorCode);
                     Assert.AreEqual(MsalErrorMessage.BrokerResponseError + response.ErrorDescription, exc.Message);
-                }
-            }
+                });
         }
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void BrokerUnknownErrorResponseTest()
         {
+            var response = new MsalTokenResponse
+            {
+                Error = null,
+                ErrorDescription = null
+            };
+
+            ValidateBrokerResponse(
+                response,
+                exception =>
+                {
+                    var exc = exception as MsalServiceException;
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
+                });
+        }
+
+        private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
+        {
+            mockHttpManager.AddInstanceDiscoveryMockHandler();
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+        }
+
+        private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, OAuthClientValidationHandler validationHandler)
+        {
+            InteractiveRequest request = CreateAuthenticationRequestParametersWithBrokerEnabled();
+
+            try
+            {
+                request.ValidateResponseFromBroker(msalTokenResponse);
+
+                Assert.Fail("MsalServiceException should have been thrown here");
+            }
+            catch (MsalServiceException exc)
+            {
+                validationHandler(exc);
+            }
+
+        }
+
+        private InteractiveRequest CreateAuthenticationRequestParametersWithBrokerEnabled()
+        {
             using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
@@ -627,33 +629,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     interactiveParameters,
                     new MockWebUI());
 
-                var response = new MsalTokenResponse
-                {
-                    Error = null,
-                    ErrorDescription = null
-                };
-
-                // Act
-                try
-                {
-                    request.ValidateResponseFromBroker(response);
-
-                    Assert.Fail("MsalServiceException should have been thrown here");
-                }
-                // Assert
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
-                }
+                return request;
             }
-        }
-
-        private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
-        {
-            mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
     }
 }
