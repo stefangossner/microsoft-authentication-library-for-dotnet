@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             {
                 /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
                 * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
-#if BUILDENV != APPCENTER
+//#if BUILDENV != APPCENTER
                 if (UIDevice.CurrentDevice.CheckSystemVersion(12, 0))
                 {
                     asWebAuthenticationSession = new AuthenticationServices.ASWebAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
@@ -107,25 +107,25 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
                     sfAuthenticationSession.Start();
                 }
-#else
-                if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
-                {
-                    sfAuthenticationSession = new SFAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
-                        redirectUri.Scheme, (callbackUrl, error) =>
-                        {
-                            if (error != null)
-                            {
-                                ProcessCompletionHandlerError(error);
-                            }
-                            else
-                            {
-                                ContinueAuthentication(callbackUrl.ToString());
-                            }
-                        });
+//#else
+//                if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+//                {
+//                    sfAuthenticationSession = new SFAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
+//                        redirectUri.Scheme, (callbackUrl, error) =>
+//                        {
+//                            if (error != null)
+//                            {
+//                                ProcessCompletionHandlerError(error);
+//                            }
+//                            else
+//                            {
+//                                ContinueAuthentication(callbackUrl.ToString());
+//                            }
+//                        });
 
-                    sfAuthenticationSession.Start();
-                }
-#endif
+//                    sfAuthenticationSession.Start();
+//                }
+//#endif
                 else
                 {
                     safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false)
