@@ -41,5 +41,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Scope = "scope";
         public const string ExpiresOn = "expires_on";
         public const string ClientInfo = "client_info";
+
+        // Android broker response codes
+        public const int UserCancelled = 2001;
+        public const int BrowserCodeError = 2002;
+        public const int ResponseReceived = 2004;
     }
 }

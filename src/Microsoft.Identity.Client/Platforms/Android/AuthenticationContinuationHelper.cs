@@ -31,6 +31,7 @@ using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 using Microsoft.Identity.Client.UI;
@@ -57,8 +58,6 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;
-
-            int code = (int)resultCode;
 
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
@@ -96,6 +95,20 @@ namespace Microsoft.Identity.Client
 
                 case AndroidConstants.Cancel:
                     return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+
+                default:
+                    return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+            }
+        }
+
+        private static AuthorizationResult ProcessFromBroker(int requestCode, Result resultCode, Intent data)
+        {
+            switch ((int)resultCode)
+            {
+                case BrokerResponseConst.ResponseReceived:
+                case BrokerResponseConst.BrowserCodeError:
+                case BrokerResponseConst.UserCancelled:
+                    return new AuthorizationResult(AndroidBroker.SetBrokerResult(data, (int)resultCode));
 
                 default:
                     return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
