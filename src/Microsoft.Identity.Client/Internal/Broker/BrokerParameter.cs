@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string MsgProtocolVersion3 = "3";
         public const string SkipCache = "YES";
 
+        public const string AppLink = "app_link";
+
         // not required
         public const string CorrelationId = "correlation_id";
         public const string ExtraQp = "extra_qp";
@@ -59,5 +61,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Force = "force";
         
         public const string BrokerInstallUrl = "broker_install_url";
+        public const string SilentBrokerFlow = "silent_broker_flow";
     }
 }

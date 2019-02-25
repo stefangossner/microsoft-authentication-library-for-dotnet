@@ -94,6 +94,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IDictionary<string, string> ExtraQueryParameters { get; }
         public string Claims { get; }
 
+        public string BrokerAccountName { get; set; }
+        public string UserId { get; set; }
         internal bool IsBrokerEnabled { get; set; }
 
 #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS

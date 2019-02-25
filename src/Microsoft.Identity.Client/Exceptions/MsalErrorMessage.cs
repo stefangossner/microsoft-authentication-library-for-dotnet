@@ -138,5 +138,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string CallingThisFromTheMainThreadCanLeadToDeadlock = "Calling this from your main thread can lead to deadlock";
+        public const string BundleResultInBrokerResponseIsNull = "bundleResult in broker response is null";
     }
 }

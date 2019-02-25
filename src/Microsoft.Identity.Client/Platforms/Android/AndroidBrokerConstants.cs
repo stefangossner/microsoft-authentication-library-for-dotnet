@@ -46,6 +46,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
          */
         public const string BrokerAccountType = "com.microsoft.workaccount";
 
+        public const string WorkAccount = "com.microsoft.workaccount.user.info";
+
         public const string AccountInitialName = "aad";
 
         public const string BackgroundRequestMessage = "background.request";
@@ -136,8 +138,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string ChallangeResponseVersion = "Version";
 
         public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
+
         public const string ResponseErrorMessage = "com.microsoft.aad.adal:BrowserErrorMessage";
 
+        public const string SHA = "SHA";
 
         /**
          * Certificate authorities are passed with delimiter.
@@ -170,13 +174,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public const string ChallangeTlsIncapableVersion = "1.0";
 
-        public const string RedirectPrefix = "msauth";
+        public const string RedirectPrefix = "msauthv2";
 
         //public const Object REDIRECT_DELIMETER_ENCODED = "%2C";
 
         public const string BrowserExtPrefix = "browser://";
 
-        public const string BrowserExtInstallPrefix = "msauth://";
+        public const string BrowserExtInstallPrefix = "msauthv2://";
 
         public const string CallerInfoPackage = "caller.info.package";
 
@@ -185,5 +189,63 @@ namespace Microsoft.Identity.Client.Platforms.Android
         // Claims step-up. Skip cache look up
         public const string SkipCache = "skip.cache";
         public const string Claims = "account.claims";
+
+        public const string AccountChooserActivity = ".ui.AccountChooserActivity";
+
+        public const string CanInvokeBroker = "Can invoke broker? ";
+
+        // Broker related log messages
+        public const string BrokerProxyGettingTheAndroidContext = "BrokerProxy: Getting the Android context";
+        public const string BrokerProxyGettingTheBrokerWorkAndSchoolAccounts = "BrokerProxy: Getting the broker work and school accounts ";
+        public const string BrokerProxyTheBrokerFoundSomeAccounts = "BrokerProxy: The broker found some accounts";
+        public const string BrokerProxyFoundAccountBasedonBrokerAccountName = "BrokerProxy: Found account based on the broker account name? ";
+        public const string BrokerProxyNoBrokerAccountGettingBrokerUsers = "BrokerProxy: No broker account - getting broker users";
+        public const string BrokerProxyFoundSomeBrokerUsers = "Broker Proxy: Found some broker users";
+        public const string BrokerProxyFoundAMatchingUser = "BrokerProxy: Found a matching user? ";
+        public const string BrokerProxyFoundAMatchingAccountBasedOnTheUser = "BrokerProxy: Found a matching account based on the user? ";
+        public const string BrokerProxyInvokingTheBrokerToGetAToken = "BrokerProxy: Invoking the broker to get a token";
+        public const string BrokerProxyReceivedResultFromAuthenticator = "BrokerProxy: Received result from Authenticator? ";
+        public const string BrokerProxyReturningResultFromAuthenticator = "BrokerProxy: Returning result from Authenticator ? ";
+        public const string BrokerProxyTargetAccountIsNotFound = "Target account is not found";
+        public const string BrokerProxyFindingAccount = "BrokerProxy: Finding Account... ";
+        public const string BrokerProxyLookingForAMatchWithBrokerAccount = "Broker Proxy: Looking for a match with broker account. Found? ";
+        public const string BrokerProxyInitialRequestNotReturningAToken = "BrokerProxy: Initial request - not returning a token. ";
+        public const string CallingAppPackageDoesNotExistInPackageManager = "BrokerProxy: Calling App's package does not exist in PackageManager. ";
+        public const string DigestShaAlgorithmDoesNotExist = "Digest SHA algorithm does not exist. ";
+        public const string BrokerProxyCheckAccountIsGettingTheAuthenticatorTypes = "BrokerProxy: CheckAccount. Getting authenticator types: ";
+        public const string BrokerProxyGettingTheAccountList = "BrokerProxy: Getting the account list ";
+        public const string BrokerProxyCheckingTheAccountFailedBecauseTheBrokerPackageWasNotFound = "BrokerProxy: Checking the account failed because the broker package was not found. ";
+        public const string BrokerProxyPackageName = "BrokerProxy: Package name is: ";
+        public const string BrokerProxyBrokerSupportsAddingAccounts = "BrokerProxy: Broker supports adding accounts. ";
+        public const string BrokerProxyBrokerDoesNotSupportAddingAccountsButSomeAccountsAreConfiguredVerifyingIfAnAccountCanBeUsed =
+            "BrokerProxy: Broker does not support adding accounts but some accounts are configured. Verifying if an account can be used...";
+        public const string BrokerProxyCouldNotVerifyThatAnAccountCanBeUsed = "BrokerProxy: Could not verify that an account can be used. ";
+        public const string BrokerProxyStartingAccountVerification = "BrokerProxy: starting account verification. ";
+        public const string BrokerProxyFoundAnAccountThatMatchesTheUsername = "BrokerProxy: Found an account that matches the username? ";
+        public const string BrokerProxyCouldNotVerifyAnAccountBecauseOfAnException = "BrokerProxy: Could not verify an account because of an exception. ";
+        public const string BrokerProxyCouldNotVerifyTheAccount = "BrokerProxy: Could not verify the account. ";
+        public const string BrokerProxyAccountVerificationPassed = "BrokerProxy: Account verification passed. ";
+        public const string BrokerProxyFoundTheAuthenticatorOnTheDevice = "BrokerProxy: Found the Authenticator on the device";
+        public const string BrokerProxyNoAuthenticatorFoundOnTheDevice = "BrokerProxy: No Authenticator found on the device.";
+
+        public const string AndroidBrokerPayloadContainsInstallUrl = "Android Broker - broker payload contains install url";
+        public const string AndroidBrokerStartingActionViewActivityTo = "Android Broker - Starting ActionView activity to: ";
+        public const string SwitchedToBrokerForContext = "Switched to broker for context: ";
+        public const string LoginHint = " login hint: ";
+        public const string UserIsSpecifiedForBackgroundTokenRequest = "User is specified for background token request ";
+        public const string UserIsNotSpecifiedForBackgroundTokenRequest = "User is not specified for background token request ";
+        public const string TokenIsReturnedFromBackgroundCall = "Token is returned from background call ";
+        public const string TokenIsNotReturnedFromBackgroundCallLaunchActivityForAuthenticator = "Token is not returned from background call. Will launch activity for Authenticator." +
+            "Starting Authentication Activity... ";
+        public const string CannotInvokeBrokerInInteractiveModeBecauseThisIsASilentFlow = "Can't invoke the broker in interactive mode because this is a silent flow ";
+        public const string CallingActivityPid = "Calling activity pid:";
+        public const string tid = " tid: ";
+        public const string uid = " uid: ";
+
+
+        public static string BrokerProxyAccountFoundMessage(bool found)
+        {
+            return BrokerProxyLookingForAMatchWithBrokerAccount + found;
+        }
     }
 }

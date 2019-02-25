@@ -25,29 +25,21 @@
 // 
 // ------------------------------------------------------------------------------
 
-#if iOS
-using Microsoft.Identity.Client.Platforms.iOS;
-#endif
-#if ANDROID
-using Microsoft.Identity.Client.Platforms.Android;
-#endif
-using Microsoft.Identity.Client.Core;
-using System;
-
-namespace Microsoft.Identity.Client.Internal.Broker
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class BrokerFactory
+    internal static class MsalErrorAndroidEx
     {
-        // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
-        public IBroker CreateBrokerFacade(IServiceBundle serviceBundle)
-        {
-#if iOS
-            return new iOSBroker(serviceBundle);
-#elif ANDROID
-            return new AndroidBroker(serviceBundle);
-#else
-            return new NullBroker();
-#endif
-        }
+        public const string MissingPackagePermission = "missing_package_permission";
+        public const string CannotSwitchToBrokerFromThisApp = "cannot_switch_to_broker_from_this_app";
+        public const string IncorrectBrokerAccountType = "incorrect_broker_account_type";
+        public const string IncorrectBrokerAppSignature = "incorrect_broker_app_signature";
+        public const string FailedToGetBrokerAppSignature = "failed_to_get_broker_app_signature";
+        public const string MissingBrokerRelatedPackage = "missing_broker_related_package";
+        public const string MissingDigestShaAlgorithm = "missing_digest_sha_algorithm";
+        public const string SignatureVerificationFailed = "signature_verification_failed";
+        public const string NoBrokerAccountFound = "broker_account_not_found";
+        public const string BrokerApplicationRequired = "broker_application_required";
+        public const string IncorrectBrokerRedirectUri = "incorrect_broker_redirecturi";
+        public const string CallingOnMainThread = "calling_getBrokerUsers_on_main_thread";
     }
 }

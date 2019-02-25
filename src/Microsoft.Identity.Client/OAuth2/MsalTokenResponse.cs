@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
 
-        public string Authority { get; private set; }
+        public string Authority { get; set; }
 
         internal static MsalTokenResponse CreateFromBrokerResponse(Dictionary<string, string> responseDictionary)
         {
