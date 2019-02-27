@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private const string KeyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
 
-        private const string DataFileName = "data.txt";
+        private readonly string TestData = Microsoft.Identity.Test.LabInfrastructure.Properties.Resources.data;
 
         private AuthenticationResult AuthResult;
 
@@ -94,18 +94,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 AuthType = KeyVaultAuthenticationType.ClientCertificate
             };
 
-            //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
-            //After the tests are finished in appcenter, the file will be deleted from the appcenter servers.
-            //The file will then be deleted locally Via VSTS task.
-            if (File.Exists(DataFileName))
+            //The data.txt is a place holder for the keyvault secret. It will only be written to during build time.
+            if (!string.IsNullOrWhiteSpace(TestData))
             {
-                var data = File.ReadAllText(DataFileName);
-
-                if (!string.IsNullOrWhiteSpace(data))
-                {
-                    Config.AuthType = KeyVaultAuthenticationType.ClientSecret;
-                    Config.KeyVaultSecret = data;
-                }
+                Config.AuthType = KeyVaultAuthenticationType.ClientSecret;
+                Config.KeyVaultSecret = TestData;
             }
 
             Config.CertThumbprint = KeyVaultThumbPrint;
