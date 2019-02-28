@@ -100,6 +100,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 Config.AuthType = KeyVaultAuthenticationType.ClientSecret;
                 Config.KeyVaultSecret = TestData;
             }
+            else
+            {
+#pragma warning disable CA2201 // Do not raise reserved exception types
+                throw new Exception("FAILED, NO SECRET");
+#pragma warning restore CA2201 // Do not raise reserved exception types
+            }
 
             Config.CertThumbprint = KeyVaultThumbPrint;
             KeyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
