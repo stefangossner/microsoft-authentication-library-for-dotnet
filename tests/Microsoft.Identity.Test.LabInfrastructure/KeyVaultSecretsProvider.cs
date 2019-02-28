@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             Config = new KeyVaultConfiguration
             {
-                AuthType = KeyVaultAuthenticationType.ClientCertificate
+                AuthType = KeyVaultAuthenticationType.ClientSecret
             };
 
             //The data.txt is a place holder for the keyvault secret. It will only be written to during build time.
